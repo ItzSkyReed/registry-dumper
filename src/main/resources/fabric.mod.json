@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "registry_dumper",
+  "version": "${version}",
+  "name": "Registry Dumper",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/registry_dumper/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "com.skyreed.dumper.RegistryDumperMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
