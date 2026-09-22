@@ -54,10 +54,10 @@ jobs:
             -e LEVEL_TYPE=FLAT \
             -e TYPE=FABRIC \
             -e VERSION=${{ steps.props.outputs.mc_version }} \
+            -e FABRIC_LOADER_VERSION=${{ steps.props.outputs.loader_version }} \
+            -e MODRINTH_PROJECTS="fabric-api:${{ steps.props.outputs.fabric_api_version }}" \
             -e ONLINE_MODE=FALSE \
             -e UID=$(id -u) \
-            -e FABRIC_LOADER_VERSION=${{ steps.props.outputs.loader_version }} \
-            -e FABRIC_API_VERSION=${{ steps.props.outputs.fabric_api_version }} \
             -e GID=$(id -g) \
             -v $(pwd)/server_data:/data \
             itzg/minecraft-server
