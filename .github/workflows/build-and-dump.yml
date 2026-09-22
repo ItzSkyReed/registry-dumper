@@ -1,0 +1,71 @@
+name: Build, Dump Registries and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-dump:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build Mod
+        run: ./gradlew build
+
+      - name: Parse properties
+        id: props
+        run: |
+          MC_VER=$(grep '^minecraft_version=' gradle.properties | cut -d'=' -f2 | tr -d ' \r')
+          MOD_VER=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2 | tr -d ' \r')
+          echo "mc_version=$MC_VER" >> $GITHUB_OUTPUT
+          echo "mod_version=$MOD_VER" >> $GITHUB_OUTPUT
+
+      - name: Prepare Server Directories & Copy Mod
+        run: |
+          mkdir -p server_data/mods
+          find build/libs/ -type f -name "*.jar" ! -name "*-sources.jar" ! -name "*-dev.jar" -exec cp {} server_data/mods/mod.jar \;
+
+      - name: Run Fabric Server in Docker
+        run: |
+          docker run --rm \
+            -e EULA=TRUE \
+            -e LEVEL_TYPE=FLAT \
+            -e TYPE=FABRIC \
+            -e VERSION=${{ steps.props.outputs.mc_version }} \
+            -e ONLINE_MODE=FALSE \
+            -e UID=$(id -u) \
+            -e GID=$(id -g) \
+            -v $(pwd)/server_data:/data \
+            itzg/minecraft-server
+
+      - name: Archive Dump Output
+        run: |
+          cd server_data
+          zip -r ../registry_dump_${{ steps.props.outputs.mc_version }}.zip dump_output/
+          cd ..
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            build/libs/!(*-sources|*-dev).jar
+            registry_dump_${{ steps.props.outputs.mc_version }}.zip
+          generate_release_notes: true
