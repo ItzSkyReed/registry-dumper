@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
+import net.minecraft.world.entity.EntityType;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -62,6 +63,7 @@ public class RegistryDumperMod implements DedicatedServerModInitializer {
             dumpDyeColors(outputDir.resolve("dye_colors.json"));
             dumpPotions(outputDir.resolve("potion.json"));
             dumpContainers(outputDir.resolve("containers.json"));
+            dumpEntities(outputDir.resolve("entities.json"));
 
             // Dynamic data registries (loaded via RegistryAccess)
             dumpBannerPatterns(access, outputDir.resolve("banner_patterns.json"));
@@ -72,6 +74,29 @@ public class RegistryDumperMod implements DedicatedServerModInitializer {
             System.out.println("[RegistryDumper] All registry files successfully generated!");
             server.halt(false);
         });
+    }
+
+    /**
+     * Dumps all registered entity types with display name, translation key, category, and summonability.
+     *
+     * @param path Target destination file path.
+     */
+    private void dumpEntities(Path path) {
+        JsonObject root = new JsonObject();
+
+        for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
+            Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
+            JsonObject entityData = new JsonObject();
+
+            entityData.addProperty("display_name", entityType.getDescription().getString());
+            entityData.addProperty("translation_key", entityType.getDescriptionId());
+            entityData.addProperty("category", entityType.getCategory().getName());
+            entityData.addProperty("summonable", entityType.canSummon());
+
+            root.add(id.getPath(), entityData);
+        }
+
+        writeJson(root, path);
     }
 
     /**
