@@ -7,7 +7,6 @@
   "authors": [],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/registry_dumper/icon.png",
   "environment": "server",
   "entrypoints": {
     "server": [
