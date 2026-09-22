@@ -34,8 +34,13 @@ jobs:
         run: |
           MC_VER=$(grep '^minecraft_version=' gradle.properties | cut -d'=' -f2 | tr -d ' \r')
           MOD_VER=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2 | tr -d ' \r')
+          LOADER_VER=$(grep '^loader_version=' gradle.properties | cut -d'=' -f2 | tr -d ' \r')
+          FABRIC_API_VER=$(grep '^fabric_api_version=' gradle.properties | cut -d'=' -f2 | tr -d ' \r')
+          
           echo "mc_version=$MC_VER" >> $GITHUB_OUTPUT
           echo "mod_version=$MOD_VER" >> $GITHUB_OUTPUT
+          echo "loader_version=$LOADER_VER" >> $GITHUB_OUTPUT
+          echo "fabric_api_version=$FABRIC_API_VER" >> $GITHUB_OUTPUT
 
       - name: Prepare Server Directories & Copy Mod
         run: |
